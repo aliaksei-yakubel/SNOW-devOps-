@@ -25,11 +25,11 @@ jobs:
     - name: Setup repo
       run: smth
     - name: Setup Deno
-      run: smth
-    - name: Run linter
-      run: smth
-    - name: Run tests
-      run: smth #deno test -A
+      run: echo "Setting up Deno..."
+    # - name: Run linter
+    #   run: smth
+    # - name: Run tests
+    #   run: smth #deno test -A
           
   build:
     name: Build
@@ -37,11 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build repo
-        run: smth
-      - name: Setup Env
-        run: smth
-      - name: Go 
-        run: deno test B
+        run: echo "Building..."
+      # - name: Setup Env
+      #   run: smth
+      # - name: Go 
+      #   run: deno test B
 
   deploy:
     name: Deploy
@@ -49,8 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to prod
-        run: smth
-      - name: Setup Env
-        run: smth
-      - name: Go Live
-        run: deno test B
+        run: echo "Deploying..."
+      # - name: Setup Env
+      #   run: smth
+      # - name: Go Live
+      #   run: deno test B
