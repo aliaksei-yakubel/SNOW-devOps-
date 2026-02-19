@@ -1,4 +1,4 @@
-// Base API URL
+// Base API URL 1
 const API_BASE = 'https://jsonplaceholder.typicode.com';
 
 // Get output element
