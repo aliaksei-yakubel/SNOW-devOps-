@@ -42,7 +42,7 @@ jobs:
       run: npm run lint
 
     - name: Run Audit
-      run: npm audit
+      run: npm audit fix 
       
   test:
     name: Deno Test
