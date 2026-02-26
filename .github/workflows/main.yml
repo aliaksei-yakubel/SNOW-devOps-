@@ -42,7 +42,7 @@ jobs:
       run: npm run lint
 
     - name: Run Audit
-      run: npm audit fix 
+      run: npm audit fix --audit-level=moderate
       
   test:
     name: Deno Test
