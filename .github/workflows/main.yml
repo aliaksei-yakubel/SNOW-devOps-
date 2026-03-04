@@ -79,6 +79,9 @@ jobs:
     name: Approval
     needs: [build]
     runs-on: ubuntu-latest
+    outputs:
+      change-request-number: ${{ steps.create.outputs.change-request-number }}
+      change-request-sys-id: ${{ steps.create.outputs.change-request-sys-id }}
     steps:
       - name: Awaiting approval before deployment
         run: echo "Awaiting approval before deployment..."
@@ -98,6 +101,8 @@ jobs:
           changeCreationTimeOut: '3600'
           abortOnChangeCreationFailure: true
           abortOnChangeStepTimeout: true
+      - name: Output of Change Creation
+        run: echo "change-request-number = ${{ steps.create.outputs.change-request-number }} and change-request-sys-id = ${{ steps.create.outputs.change-request-sys-id }} " >> $GITHUB_OUTPUT
           
   deploy:
     name: Deploy
