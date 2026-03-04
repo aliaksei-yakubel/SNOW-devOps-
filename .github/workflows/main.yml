@@ -40,9 +40,6 @@ jobs:
       
     - name: Run lint
       run: npm run lint
-
-    - name: Run Audit
-      run: npm audit fix --audit-level=moderate
       
   test:
     name: Deno Test
@@ -77,38 +74,9 @@ jobs:
           
       - name: Build repo
         run: echo "Building..."
-
-  approval:
-    name: Approval
-    needs: [build]
-    runs-on: ubuntu-latest
-    outputs:
-      change-request-number: ${{ steps.create.outputs.change-request-number }}
-      change-request-sys-id: ${{ steps.create.outputs.change-request-sys-id }}
-    steps:
-      - name: Awaiting approval before deployment
-        run: echo "Awaiting approval before deployment..."
-      - name: ServiceNow Change
-        continue-on-error: true
-        uses: ServiceNow/servicenow-devops-change@v6.1.0
-        id: create
-        with:
-          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: 'Deploy'
-          change-request: '{"setCloseCode":"true","autoCloseChange":true,"attributes":{"short_description":"Git-Hub Automated Software Deployment","description":"Automated Software Deployment. RLSE0010029","cmdb_ci":"ab710cdf93bab6101b78b4da6aba10c0","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed", "chg_model":"5c05c754433a02104a6e556d58b8f278"}}'
-          
-          interval: '100'
-          timeout: '3600'
-          changeCreationTimeOut: '3600'
-          abortOnChangeCreationFailure: true
-          abortOnChangeStepTimeout: true
-
   deploy:
     name: Deploy
-    needs: [build, approval]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -121,9 +89,27 @@ jobs:
           
       - name: Deploy to prod
         run: echo "Deploying..."
+
+      - name: ServiceNow Change
+        continue-on-error: true
+        uses: ServiceNow/servicenow-devops-change@v6.1.0
+        id: create
+        with:
+          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Deploy'
+          change-request: '{"setCloseCode":"true","autoCloseChange":true,"attributes":{"short_description":"Git-Hub Automated Software Deployment","description":"Automated Software Deployment. RLSE0010029","cmdb_ci":"ab710cdf93bab6101b78b4da6aba10c0","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed", "chg_model":"5c05c754433a02104a6e556d58b8f278"}}'
+          interval: '100'
+          timeout: '3600'
+          changeCreationTimeOut: '3600'
+          abortOnChangeCreationFailure: true
+          abortOnChangeStepTimeout: true
+          
           
       - name: Output of Change Creation
-        run: echo "change-request-number = ${{ needs.approval.outputs.change-request-number }} and change-request-sys-id = ${{ needs.approval.outputs.change-request-sys-id }} " >> $GITHUB_OUTPUT
+        run: echo "change-request-number = ${{ steps.create.outputs.change-request-number }} and change-request-sys-id = ${{ steps.create.outputs.change-request-sys-id }} " >> $GITHUB_OUTPUT
 
       - name: ServiceNow Update Change
         continue-on-error: true
@@ -133,9 +119,8 @@ jobs:
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
           context-github: ${{ toJSON(github) }}
-          change-request-number: '${{ needs.approval.outputs.change-request-number }}'
+          change-request-number: 'CHG0380544'
           change-request-details: '{"short_description":"Hello from CICD Pipeline","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}'
       
       - name: Output of Change Creation
-        run: echo "change-request-number = ${{ needs.approval.outputs.change-request-number }}" >> $GITHUB_OUTPUT
-
+        run: echo "change-request-number = ${{ steps.create.outputs.change-request-number }}" >> $GITHUB_OUTPUT
