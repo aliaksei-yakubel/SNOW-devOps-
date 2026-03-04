@@ -82,6 +82,23 @@ jobs:
     steps:
       - name: Awaiting approval before deployment
         run: echo "Awaiting approval before deployment..."
+      - name: ServiceNow Change
+        continue-on-error: true
+        uses: ServiceNow/servicenow-devops-change@v6.1.0
+        id: create
+        with:
+          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Approval'
+          change-request: '{"setCloseCode":"true","autoCloseChange":true,"attributes":{"short_description":"Git-Hub Automated Software Deployment","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed","chg_model":"5c05c754433a02104a6e556d58b8f278"}}'
+          interval: '100'
+          timeout: '3600'
+          deployment-gate: '{"environment":"deploy-gates-demo","jobName":"Deploy"}'
+          changeCreationTimeOut: '3600'
+          abortOnChangeCreationFailure: true
+          abortOnChangeStepTimeout: true
           
   deploy:
     name: Deploy
